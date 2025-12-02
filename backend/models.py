@@ -69,22 +69,6 @@ class WorkoutSet(Base):
     exercise = relationship("Exercise", back_populates="sets")
 
 
-class Food(Base):
-    __tablename__ = "foods"
-
-    food_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    food_name = Column(String, nullable=False)
-    calories = Column(Float, nullable=False)
-    carbs = Column(Float, nullable=False)
-    fats = Column(Float, nullable=False)
-    protein = Column(Float, nullable=False)
-    sugar = Column(Float, nullable=False)
-    category = Column(String, nullable=False)
-
-    # One food -> many MealItems
-    meal_items = relationship("MealItem", back_populates="food", cascade="all, delete-orphan")
-
-
 class Meal(Base):
     __tablename__ = "meals"
 
@@ -96,6 +80,21 @@ class Meal(Base):
     user = relationship("User", back_populates="meals")
     meal_items = relationship("MealItem", back_populates="meal", cascade="all, delete-orphan")
 
+class Food(Base):
+    __tablename__ = "foods"
+
+    food_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    food_name = Column(String, nullable=False)
+    calories = Column(Float, nullable=False)          # per serving
+    carbs = Column(Float, nullable=False)             # per serving
+    fats = Column(Float, nullable=False)              # per serving
+    protein = Column(Float, nullable=False)           # per serving
+    sugar = Column(Float, nullable=False)             # per serving
+    category = Column(String, nullable=False)
+    serving_size_grams = Column(Float, nullable=False)  # size of 1 serving in grams
+
+    meal_items = relationship("MealItem", back_populates="food", cascade="all, delete-orphan")
+
 
 class MealItem(Base):
     __tablename__ = "meal_items"
@@ -103,8 +102,7 @@ class MealItem(Base):
     meal_item_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     meal_id = Column(Integer, ForeignKey("meals.meal_id", ondelete="CASCADE"), nullable=False)
     food_id = Column(Integer, ForeignKey("foods.food_id", ondelete="CASCADE"), nullable=False)
-    quantity = Column(Float, nullable=False)
-    unit = Column(String, nullable=False)
+    quantity = Column(Float, nullable=False)  # number of servings (relative to Food.serving_size_grams)
 
     meal = relationship("Meal", back_populates="meal_items")
     food = relationship("Food", back_populates="meal_items")

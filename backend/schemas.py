@@ -1,3 +1,4 @@
+# schemas.py
 from datetime import datetime, date
 from typing import List, Optional
 from pydantic import BaseModel
@@ -5,11 +6,20 @@ from pydantic import BaseModel
 
 # ---------- Users ----------
 
-class UserLogin(BaseModel):
+class UserBase(BaseModel):
     email: str
     name: Optional[str] = None
     surname: Optional[str] = None
     location: Optional[str] = None
+
+
+class UserCreate(UserBase):
+    pass
+
+
+class UserLogin(UserBase):
+    # same fields as UserBase; for now no password
+    pass
 
 
 class UserOut(BaseModel):
@@ -26,6 +36,7 @@ class UserOut(BaseModel):
 # ---------- Sleep ----------
 
 class SleepCreate(BaseModel):
+    user_id: int
     start_time: datetime
     end_time: datetime
     quality_score: Optional[int] = None
@@ -36,26 +47,27 @@ class SleepOut(BaseModel):
     user_id: int
     start_time: datetime
     end_time: datetime
-    quality_score: Optional[int] = None
+    quality_score: Optional[int]
 
     class Config:
         orm_mode = True
 
 
-# ---------- Workouts ----------
+# ---------- Workouts & Sets ----------
+
+class WorkoutCreate(BaseModel):
+    user_id: int
+    start_time: datetime
+    end_time: datetime
+    label: Optional[str] = None
+
 
 class WorkoutSetCreate(BaseModel):
+    workout_id: int
     exercise_id: int
     num_reps: int
     weight_amount: float
     set_order: int
-
-
-class WorkoutWithSetsCreate(BaseModel):
-    start_time: datetime
-    end_time: datetime
-    label: Optional[str] = None
-    sets: List[WorkoutSetCreate]
 
 
 class WorkoutSetOut(BaseModel):
@@ -89,29 +101,57 @@ class WorkoutSummary(BaseModel):
     num_sets: int
 
 
-# ---------- Meals ----------
+# ---------- Foods ----------
+
+# schemas.py (only the relevant parts)
+
+class FoodCreate(BaseModel):
+    food_name: str
+    calories: float
+    carbs: float
+    fats: float
+    protein: float
+    sugar: float
+    category: str
+    serving_size_grams: float  # new field
+
+
+class FoodOut(BaseModel):
+    food_id: int
+    food_name: str
+    calories: float
+    carbs: float
+    fats: float
+    protein: float
+    sugar: float
+    category: str
+    serving_size_grams: float  # new field
+
+    class Config:
+        orm_mode = True
+
+
+
+# ---------- Meals & Meal Items ----------
 
 class MealItemCreate(BaseModel):
+    meal_id: int
     food_id: int
-    quantity: float
-    unit: str
-
-
-class MealWithItemsCreate(BaseModel):
-    time_of_meal: datetime
-    meal_name: str
-    items: List[MealItemCreate]
+    quantity: float  # number of servings (no unit)
 
 
 class MealItemOut(BaseModel):
     meal_item_id: int
     meal_id: int
     food_id: int
-    quantity: float
-    unit: str
+    quantity: float  # number of servings
 
     class Config:
         orm_mode = True
+class MealCreate(BaseModel):
+    user_id: int
+    time_of_meal: datetime
+    meal_name: str
 
 
 class MealOut(BaseModel):
@@ -119,15 +159,12 @@ class MealOut(BaseModel):
     user_id: int
     time_of_meal: datetime
     meal_name: str
-    items: List[MealItemOut] = []
+    meal_items: List[MealItemOut] = []
 
     class Config:
         orm_mode = True
 
 
-class DailyMealsSummary(BaseModel):
-    date: date
-    total_calories: float
 
 
 # ---------- Dashboard Summary ----------
@@ -146,7 +183,9 @@ class WorkoutsPerDay(BaseModel):
 class CaloriesPerDay(BaseModel):
     date: date
     calories: float
-
+    carbs: float
+    fats: float
+    protein: float
 
 class UserSummary(BaseModel):
     sleep: List[SleepSummaryEntry]
