@@ -1,6 +1,7 @@
 import os
 import requests
 import streamlit as st
+import pandas as pd
 from datetime import datetime, date, time, timedelta
 
 
@@ -65,6 +66,23 @@ def get_all_foods():
     st.session_state["foods"] = data
     return data
 
+def fetch_user_summary(user_id: int, days: int = 7):
+    """Call the backend /users/{user_id}/summary API and return JSON or None on failure."""
+    try:
+        resp = requests.get(
+            f"{BACKEND_URL}/users/{user_id}/summary",
+            params={"days": days},
+            timeout=10,
+        )
+    except Exception as e:
+        st.error(f"Error reaching backend for summary: {e}")
+        return None
+
+    if not resp.ok:
+        st.error(f"Error fetching summary: {resp.status_code} - {resp.text}")
+        return None
+
+    return resp.json()
 
 # -------------------- LOGIN --------------------
 
@@ -112,6 +130,7 @@ def login_page():
 def dashboard():
     user = st.session_state["user"] or {}
     email = user.get("email", "Unknown user")
+    user_id = user.get("user_id") or user.get("id")
 
     st.sidebar.write(f"Logged in as: {email}")
     if st.sidebar.button("Log out"):
@@ -119,10 +138,11 @@ def dashboard():
         st.rerun()
 
     st.title("Workoutify Dashboard 🏋️")
-    st.success("Login successful! 🎉")
+    #st.success("Login successful! 🎉")
 
     st.write("This is your main dashboard. From here you can add workouts, sleep, meals, etc.")
 
+    # ---- navigation buttons ----
     col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
 
     with col1:
@@ -145,6 +165,106 @@ def dashboard():
             st.session_state["page"] = "sleep_form"
             st.rerun()
 
+    # ---- summary charts ----
+    if not user_id:
+        st.warning("No user_id available; cannot load dashboard summary.")
+        return
+
+    st.markdown("---")
+    st.subheader("Last 7 days overview 📊")
+
+    summary = fetch_user_summary(int(user_id), days=7)
+    if not summary:
+        return  # errors already displayed
+
+    # -------- Sleep chart --------
+    sleep_data = summary.get("sleep", [])
+    col_sleep, col_sleep_stats = st.columns([2, 1])
+
+    with col_sleep:
+        st.markdown("**Sleep duration (hours per day)**")
+        if sleep_data:
+            df_sleep = pd.DataFrame(sleep_data)
+            # ensure date is treated nicely
+            df_sleep["date"] = pd.to_datetime(df_sleep["date"])
+            df_sleep = df_sleep.sort_values("date")
+            df_sleep.set_index("date", inplace=True)
+
+            st.bar_chart(df_sleep["hours"])
+        else:
+            st.info("No sleep data for the last 7 days.")
+
+    with col_sleep_stats:
+        if sleep_data:
+            df_sleep = pd.DataFrame(sleep_data)
+            avg_hours = df_sleep["hours"].mean()
+            avg_quality = df_sleep["quality_score"].mean() if "quality_score" in df_sleep else None
+
+            st.metric("Avg sleep (h)", f"{avg_hours:.1f}")
+            if avg_quality is not None:
+                st.metric("Avg quality", f"{avg_quality:.1f}/10")
+        else:
+            st.write("Sleep stats will appear once you log some sleep.")
+
+    st.markdown("---")
+
+    # -------- Workouts per day --------
+    workouts_data = summary.get("workouts_per_day", [])
+    col_w1, col_w2 = st.columns(2)
+
+    with col_w1:
+        st.markdown("**Workouts per day (count)**")
+        if workouts_data:
+            df_w = pd.DataFrame(workouts_data)
+            df_w["date"] = pd.to_datetime(df_w["date"])
+            df_w = df_w.sort_values("date")
+            df_w.set_index("date", inplace=True)
+
+            st.bar_chart(df_w["count"])
+        else:
+            st.info("No workouts logged in the last 7 days.")
+
+    with col_w2:
+        st.markdown("**Total weight lifted per day**")
+        if workouts_data:
+            df_w = pd.DataFrame(workouts_data)
+            df_w["date"] = pd.to_datetime(df_w["date"])
+            df_w = df_w.sort_values("date")
+            df_w.set_index("date", inplace=True)
+
+            # total_weight field we added in the summary API
+            if "total_weight" in df_w:
+                st.bar_chart(df_w["total_weight"])
+            else:
+                st.info("Backend summary does not yet include total_weight.")
+        else:
+            st.info("No volume data yet.")
+
+    st.markdown("---")
+
+    # -------- Nutrition per day --------
+    st.markdown("**Daily calories & macros (servings-based)**")
+
+    cal_data = summary.get("calories_per_day", [])
+    if cal_data:
+        df_c = pd.DataFrame(cal_data)
+        df_c["date"] = pd.to_datetime(df_c["date"])
+        df_c = df_c.sort_values("date")
+        df_c.set_index("date", inplace=True)
+
+        # Calories chart
+        st.markdown("Calories per day")
+        st.bar_chart(df_c["calories"])
+
+        # Macros stacked bar – simple multi-series bar chart
+        st.markdown("Macros per day (g)")
+        macro_cols = [col for col in ["carbs", "fats", "protein"] if col in df_c.columns]
+        if macro_cols:
+            st.bar_chart(df_c[macro_cols])
+        else:
+            st.info("No macro data available in summary.")
+    else:
+        st.info("No nutrition data for the last 7 days.")
 
 # ----------------------- Sleep Form --------------------
 
