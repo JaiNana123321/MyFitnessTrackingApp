@@ -471,6 +471,31 @@ def get_meals_all(
 
     return meals
 
+# Create a new exercise (e.g., Squat, Bench, Deadlift)
+@app.post("/exercises", response_model=schemas.ExerciseOut)
+def create_exercise(ex_in: schemas.ExerciseCreate, db: Session = Depends(get_db)):
+    exercise = models.Exercise(
+        exercise_name=ex_in.exercise_name,
+        primary_muscle=ex_in.primary_muscle,
+        secondary_muscle=ex_in.secondary_muscle,
+    )
+    db.add(exercise)
+    db.commit()
+    db.refresh(exercise)
+    return exercise
+
+
+# Get all exercises (used by frontend dropdown to select exercise for sets)
+@app.get("/exercises/all", response_model=List[schemas.ExerciseOut])
+def get_exercises_all(db: Session = Depends(get_db)):
+    # SQL: SELECT * FROM exercises ORDER BY exercise_name ASC;
+    exercises = (
+        db.query(models.Exercise)
+        .order_by(models.Exercise.exercise_name.asc())
+        .all()
+    )
+    return exercises
+
 
 # Dashboard summary: sleep, workout counts, and daily calories/macros over last N days
 @app.get("/users/{user_id}/summary", response_model=schemas.UserSummary)
