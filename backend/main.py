@@ -504,18 +504,25 @@ def user_summary(
             )
         )
 
-    # Workouts per day: count how many workouts occurred on each date
-    # SQL:
-    # SELECT DATE(start_time) AS date, COUNT(*) AS count
-    # FROM workouts
-    # WHERE user_id = :user_id AND start_time >= :cutoff
-    # GROUP BY DATE(start_time)
-    # ORDER BY DATE(start_time) ASC;
+    # Workouts per day: count how many workouts occurred on each date,
+    # and total weight lifted (sum of weight_amount * num_reps over all sets that day).
+    # SQL: SELECT DATE(w.start_time) AS date,
+    #            COUNT(DISTINCT w.workout_id) AS count,
+    #            SUM(ws.weight_amount * ws.num_reps) AS total_weight
+    #      FROM workouts w
+    #      LEFT JOIN workout_sets ws ON w.workout_id = ws.workout_id
+    #      WHERE w.user_id = :user_id AND w.start_time >= :cutoff
+    #      GROUP BY DATE(w.start_time)
+    #      ORDER BY DATE(w.start_time) ASC;
     workout_rows = (
         db.query(
             func.date(models.Workout.start_time).label("date"),
-            func.count(models.Workout.workout_id).label("count"),
+            func.count(func.distinct(models.Workout.workout_id)).label("count"),
+            func.sum(
+                models.WorkoutSet.weight_amount * models.WorkoutSet.num_reps
+            ).label("total_weight"),
         )
+        .outerjoin(models.WorkoutSet, models.Workout.workout_id == models.WorkoutSet.workout_id)
         .filter(
             models.Workout.user_id == user_id,
             models.Workout.start_time >= datetime.combine(cutoff_date, datetime.min.time()),
@@ -526,7 +533,11 @@ def user_summary(
     )
 
     workouts_per_day = [
-        schemas.WorkoutsPerDay(date=row.date, count=row.count)
+        schemas.WorkoutsPerDay(
+            date=row.date,
+            count=row.count,
+            total_weight=float(row.total_weight or 0.0),
+        )
         for row in workout_rows
     ]
 

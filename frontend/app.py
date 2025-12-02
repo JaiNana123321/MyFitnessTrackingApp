@@ -20,6 +20,52 @@ if "page" not in st.session_state:
     st.session_state["page"] = "dashboard"  # "dashboard" or "workout_form"
 
 
+# -------------------- HELPERS TO FETCH LOOKUP DATA --------------------
+
+def get_all_exercises():
+    """Fetch all exercises from backend once per session and cache in session_state."""
+    if "exercises" in st.session_state and st.session_state["exercises"] is not None:
+        return st.session_state["exercises"]
+
+    try:
+        resp = requests.get(f"{BACKEND_URL}/exercises/all", timeout=5)
+    except Exception as e:
+        st.error(f"Error fetching exercises from backend: {e}")
+        st.session_state["exercises"] = []
+        return []
+
+    if not resp.ok:
+        st.error(f"Error fetching exercises: {resp.status_code} - {resp.text}")
+        st.session_state["exercises"] = []
+        return []
+
+    data = resp.json()
+    st.session_state["exercises"] = data
+    return data
+
+
+def get_all_foods():
+    """Fetch all foods from backend once per session and cache in session_state."""
+    if "foods" in st.session_state and st.session_state["foods"] is not None:
+        return st.session_state["foods"]
+
+    try:
+        resp = requests.get(f"{BACKEND_URL}/foods/all", timeout=5)
+    except Exception as e:
+        st.error(f"Error fetching foods from backend: {e}")
+        st.session_state["foods"] = []
+        return []
+
+    if not resp.ok:
+        st.error(f"Error fetching foods: {resp.status_code} - {resp.text}")
+        st.session_state["foods"] = []
+        return []
+
+    data = resp.json()
+    st.session_state["foods"] = data
+    return data
+
+
 # -------------------- LOGIN --------------------
 
 def login_page():
@@ -35,10 +81,11 @@ def login_page():
             st.error("Please fill in email, first name, and surname.")
             return
 
+        # Backend expects: email, name, surname
         payload = {
             "email": email,
-            "first_name": first_name,
-            "last_name": last_name,
+            "name": first_name,
+            "surname": last_name,
         }
 
         try:
@@ -50,8 +97,7 @@ def login_page():
             return
 
         if resp.status_code == 200:
-            # Backend handles both login + create if user doesn't exist.
-            user = resp.json()  # expected to be the user profile
+            user = resp.json()  # expected to include user_id, email, name, surname, etc.
             st.session_state["authenticated"] = True
             st.session_state["user"] = user
             st.session_state["page"] = "dashboard"
@@ -99,7 +145,9 @@ def dashboard():
             st.session_state["page"] = "sleep_form"
             st.rerun()
 
-#----------------------- Sleep Form --------------------
+
+# ----------------------- Sleep Form --------------------
+
 def sleep_form():
     user = st.session_state["user"] or {}
     user_id = user.get("user_id") or user.get("id")  # adjust key if needed
@@ -118,7 +166,6 @@ def sleep_form():
 
     st.title("Add Sleep 😴")
 
-    # Date + times
     sleep_date = st.date_input("Sleep date (when you went to bed)", value=date.today())
     start_time_val = st.time_input("Sleep start time", value=time(23, 0))  # 11 PM
     end_time_val = st.time_input("Wake-up time", value=time(7, 0))        # 7 AM
@@ -134,7 +181,7 @@ def sleep_form():
         "Sleep quality (1 = bad, 10 = excellent)",
         min_value=1,
         max_value=10,
-        value=7,          # default
+        value=7,
         step=1,
     )
 
@@ -142,14 +189,16 @@ def sleep_form():
 
     if save_btn:
         payload = {
+            "user_id": int(user_id),
             "start_time": start_dt.isoformat(),
             "end_time": end_dt.isoformat(),
             "quality_score": quality,
         }
 
         try:
+            # Backend API: POST /sleep
             resp = requests.post(
-                f"{BACKEND_URL}/users/{user_id}/sleep",
+                f"{BACKEND_URL}/sleep",
                 json=payload,
                 timeout=10,
             )
@@ -160,7 +209,7 @@ def sleep_form():
         if resp.ok:
             st.success("Sleep entry saved! ✅")
             try:
-                st.json(resp.json())  # optional, to inspect response
+                st.json(resp.json())
             except Exception:
                 pass
         else:
@@ -171,12 +220,11 @@ def sleep_form():
         st.rerun()
 
 
+# ---------------------- Food Form --------------------
 
-#---------------------- Food Form--------------------
 def food_form():
     user = st.session_state["user"] or {}
 
-    # Sidebar (still show login + logout)
     st.sidebar.write(f"Logged in as: {user.get('email', 'Unknown user')}")
     if st.sidebar.button("Log out"):
         st.session_state.clear()
@@ -189,17 +237,17 @@ def food_form():
 
     col1, col2, col3 = st.columns(3)
     with col1:
-        calories = st.number_input("Calories", min_value=0.0, step=1.0)
+        calories = st.number_input("Calories per serving", min_value=0.0, step=1.0)
     with col2:
-        carbs = st.number_input("Carbs (g)", min_value=0.0, step=0.5)
+        carbs = st.number_input("Carbs (g) per serving", min_value=0.0, step=0.5)
     with col3:
-        fats = st.number_input("Fats (g)", min_value=0.0, step=0.5)
+        fats = st.number_input("Fats (g) per serving", min_value=0.0, step=0.5)
 
     col4, col5, col6 = st.columns(3)
     with col4:
-        protein = st.number_input("Protein (g)", min_value=0.0, step=0.5)
+        protein = st.number_input("Protein (g) per serving", min_value=0.0, step=0.5)
     with col5:
-        sugar = st.number_input("Sugar (g)", min_value=0.0, step=0.5)
+        sugar = st.number_input("Sugar (g) per serving", min_value=0.0, step=0.5)
     with col6:
         serving_size = st.number_input("Serving size (g)", min_value=0.0, step=0.5)
 
@@ -209,6 +257,9 @@ def food_form():
         if not food_name:
             st.error("Please enter a food name.")
             return
+        if serving_size <= 0:
+            st.error("Please enter a positive serving size.")
+            return
 
         payload = {
             "food_name": food_name,
@@ -217,11 +268,11 @@ def food_form():
             "fats": float(fats),
             "protein": float(protein),
             "sugar": float(sugar),
-            "category": category or None,
+            "category": category or "Uncategorized",
+            "serving_size_grams": float(serving_size),
         }
 
         try:
-            # ⚠️ Adjust the path if your backend uses a different endpoint than /foods
             resp = requests.post(f"{BACKEND_URL}/foods", json=payload, timeout=10)
         except Exception as e:
             st.error(f"Error reaching backend: {e}")
@@ -229,11 +280,12 @@ def food_form():
 
         if resp.ok:
             st.success("Food saved! ✅")
-            # optional: see what backend returns
             try:
                 st.json(resp.json())
             except Exception:
                 pass
+            # refresh foods cache
+            st.session_state["foods"] = None
         else:
             st.error(f"Error saving food: {resp.status_code} - {resp.text}")
 
@@ -241,10 +293,11 @@ def food_form():
         st.session_state["page"] = "dashboard"
         st.rerun()
 
+
 # -------------------- WORKOUT FORM --------------------
+
 def workout_form():
     user = st.session_state["user"] or {}
-    # adjust key name if your backend returns something else
     user_id = user.get("user_id") or user.get("id")
 
     st.sidebar.write(f"Logged in as: {user.get('email', 'Unknown user')}")
@@ -260,6 +313,17 @@ def workout_form():
         return
 
     st.title("Add Workout 💪")
+
+    # Fetch exercises from backend for dropdown
+    exercises = get_all_exercises()
+    if not exercises:
+        st.warning("No exercises available. Please seed or add exercises in backend.")
+
+    exercise_labels = [
+        f"{ex['exercise_name']} (id {ex['exercise_id']})" for ex in exercises
+    ]
+    # We'll use indices as selectbox options and map back to exercise_id
+    exercise_indices = list(range(len(exercises)))
 
     # --- Workout meta info ---
     workout_date = st.date_input("Workout date", value=date.today())
@@ -287,13 +351,22 @@ def workout_form():
     for i in range(int(num_sets)):
         st.markdown(f"**Set {i + 1}**")
 
-        # For now, ask for exercise_id directly (you can later swap this for a selectbox of exercises)
-        exercise_id = st.number_input(
-            f"Exercise ID for set {i + 1}",
-            min_value=1,
-            step=1,
-            key=f"exercise_id_{i}",
-        )
+        if exercises:
+            idx = st.selectbox(
+                f"Exercise for set {i + 1}",
+                options=exercise_indices,
+                format_func=lambda j: exercise_labels[j],
+                key=f"exercise_idx_{i}",
+            )
+            exercise_id = exercises[idx]["exercise_id"]
+        else:
+            exercise_id = st.number_input(
+                f"Exercise ID for set {i + 1}",
+                min_value=1,
+                step=1,
+                key=f"exercise_id_{i}",
+            )
+
         num_reps = st.number_input(
             f"Reps for set {i + 1}",
             min_value=1,
@@ -327,37 +400,75 @@ def workout_form():
             st.error("Please enter a workout label.")
             return
 
-        # you could also filter out sets with exercise_id missing, but we require >=1 here
-        payload = {
+        # 1) Create workout
+        workout_payload = {
+            "user_id": int(user_id),
             "start_time": start_dt.isoformat(),
             "end_time": end_dt.isoformat(),
             "label": label,
-            "sets": sets_data,  # <-- important
         }
 
         try:
-            resp = requests.post(
-                f"{BACKEND_URL}/users/{user_id}/workouts/with_sets",
-                json=payload,
+            workout_resp = requests.post(
+                f"{BACKEND_URL}/workouts",
+                json=workout_payload,
                 timeout=10,
             )
         except Exception as e:
-            st.error(f"Error reaching backend: {e}")
+            st.error(f"Error reaching backend when creating workout: {e}")
             return
 
-        if resp.ok:
+        if not workout_resp.ok:
+            st.error(f"Error creating workout: {workout_resp.status_code} - {workout_resp.text}")
+            return
+
+        workout_data = workout_resp.json()
+        workout_id = workout_data.get("workout_id")
+        if not workout_id:
+            st.error("Backend did not return workout_id.")
+            return
+
+        # 2) Create workout sets
+        all_ok = True
+        for s in sets_data:
+            set_payload = {
+                "workout_id": int(workout_id),
+                "exercise_id": s["exercise_id"],
+                "num_reps": s["num_reps"],
+                "weight_amount": s["weight_amount"],
+                "set_order": s["set_order"],
+            }
+            try:
+                set_resp = requests.post(
+                    f"{BACKEND_URL}/workout_sets",
+                    json=set_payload,
+                    timeout=10,
+                )
+            except Exception as e:
+                st.error(f"Error reaching backend when creating workout set: {e}")
+                all_ok = False
+                break
+
+            if not set_resp.ok:
+                st.error(f"Error creating set {s['set_order']}: {set_resp.status_code} - {set_resp.text}")
+                all_ok = False
+                # continue to attempt others, or break; here break to avoid partial confusion
+                break
+
+        if all_ok:
             st.success("Workout + sets saved! ✅")
-            st.json(resp.json())  # optional, just to see what the backend returns
-        else:
-            st.error(f"Error saving workout: {resp.status_code} - {resp.text}")
+            st.json(workout_data)  # optional
 
     if st.button("Back to dashboard"):
         st.session_state["page"] = "dashboard"
         st.rerun()
-#---------------------Meal Form--------------------
+
+
+# --------------------- Meal Form --------------------
+
 def meal_form():
     user = st.session_state["user"] or {}
-    user_id = user.get("user_id") or user.get("id")  # adjust if your user profile uses a different key
+    user_id = user.get("user_id") or user.get("id")
 
     st.sidebar.write(f"Logged in as: {user.get('email', 'Unknown user')}")
     if st.sidebar.button("Log out"):
@@ -373,10 +484,19 @@ def meal_form():
 
     st.title("Add Meal 🍽️")
 
+    # Fetch foods for dropdown
+    foods = get_all_foods()
+    if not foods:
+        st.warning("No foods available. Please add foods first.")
+    food_labels = [
+        f"{f['food_name']} (id {f['food_id']}, {f['serving_size_grams']}g serving)"
+        for f in foods
+    ]
+    food_indices = list(range(len(foods)))
+
     # --- Meal meta info ---
     meal_date = st.date_input("Meal date", value=date.today())
     meal_time = st.time_input("Time of meal", value=time(12, 0))  # default noon
-
     time_of_meal = datetime.combine(meal_date, meal_time)
 
     meal_name = st.text_input("Meal name (e.g., Breakfast, Lunch, Dinner)")
@@ -395,32 +515,35 @@ def meal_form():
     for i in range(int(num_items)):
         st.markdown(f"**Item {i + 1}**")
 
-        # For now, just ask for food_id directly. Later you could use a selectbox of foods.
-        food_id = st.number_input(
-            f"Food ID for item {i + 1}",
-            min_value=1,
-            step=1,
-            key=f"food_id_{i}",
-        )
+        if foods:
+            idx = st.selectbox(
+                f"Food for item {i + 1}",
+                options=food_indices,
+                format_func=lambda j: food_labels[j],
+                key=f"food_idx_{i}",
+            )
+            food_id = foods[idx]["food_id"]
+        else:
+            food_id = st.number_input(
+                f"Food ID for item {i + 1}",
+                min_value=1,
+                step=1,
+                key=f"food_id_{i}",
+            )
+
         quantity = st.number_input(
-            f"Quantity for item {i + 1}",
+            f"Quantity (servings) for item {i + 1}",
             min_value=0.0,
             max_value=10000.0,
             value=1.0,
             step=0.5,
             key=f"quantity_{i}",
         )
-        unit = st.text_input(
-            f"Unit for item {i + 1} (e.g., g, ml, piece)",
-            key=f"unit_{i}",
-            value="g",
-        )
 
         items.append(
             {
                 "food_id": int(food_id),
-                "quantity": float(quantity),
-                "unit": unit,
+                "quantity": float(quantity),  # servings, no unit
             }
         )
 
@@ -431,33 +554,65 @@ def meal_form():
             st.error("Please enter a meal name.")
             return
 
-        # You could filter out entries with missing food_id here if you want.
-        payload = {
+        # 1) Create meal
+        meal_payload = {
+            "user_id": int(user_id),
             "time_of_meal": time_of_meal.isoformat(),
             "meal_name": meal_name,
-            "items": items,  # ⚠️ If your backend expects 'meal_items' instead, rename this key.
         }
 
         try:
-            resp = requests.post(
-                f"{BACKEND_URL}/users/{user_id}/meals/with_items",
-                json=payload,
+            meal_resp = requests.post(
+                f"{BACKEND_URL}/meals",
+                json=meal_payload,
                 timeout=10,
             )
         except Exception as e:
-            st.error(f"Error reaching backend: {e}")
+            st.error(f"Error reaching backend when creating meal: {e}")
             return
 
-        if resp.ok:
+        if not meal_resp.ok:
+            st.error(f"Error creating meal: {meal_resp.status_code} - {meal_resp.text}")
+            return
+
+        meal_data = meal_resp.json()
+        meal_id = meal_data.get("meal_id")
+        if not meal_id:
+            st.error("Backend did not return meal_id.")
+            return
+
+        # 2) Create meal items
+        all_ok = True
+        for item in items:
+            item_payload = {
+                "meal_id": int(meal_id),
+                "food_id": item["food_id"],
+                "quantity": item["quantity"],
+            }
+            try:
+                item_resp = requests.post(
+                    f"{BACKEND_URL}/meal_items",
+                    json=item_payload,
+                    timeout=10,
+                )
+            except Exception as e:
+                st.error(f"Error reaching backend when creating meal item: {e}")
+                all_ok = False
+                break
+
+            if not item_resp.ok:
+                st.error(f"Error creating meal item (food_id={item['food_id']}): "
+                         f"{item_resp.status_code} - {item_resp.text}")
+                all_ok = False
+                break
+
+        if all_ok:
             st.success("Meal + items saved! ✅")
-            st.json(resp.json())  # optional to inspect response
-        else:
-            st.error(f"Error saving meal: {resp.status_code} - {resp.text}")
+            st.json(meal_data)
 
     if st.button("Back to dashboard"):
         st.session_state["page"] = "dashboard"
         st.rerun()
-
 
 
 # -------------------- ROUTING --------------------
@@ -476,6 +631,5 @@ else:
     elif st.session_state["page"] == "sleep_form":
         sleep_form()
     else:
-        # fallback
         st.session_state["page"] = "dashboard"
         dashboard()

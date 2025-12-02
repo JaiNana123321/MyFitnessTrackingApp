@@ -164,7 +164,20 @@ class MealOut(BaseModel):
     class Config:
         orm_mode = True
 
+class ExerciseCreate(BaseModel):
+    exercise_name: str
+    primary_muscle: Optional[str] = None
+    secondary_muscle: Optional[str] = None
 
+
+class ExerciseOut(BaseModel):
+    exercise_id: int
+    exercise_name: str
+    primary_muscle: Optional[str] = None
+    secondary_muscle: Optional[str] = None
+
+    class Config:
+        orm_mode = True
 
 
 # ---------- Dashboard Summary ----------
@@ -178,7 +191,7 @@ class SleepSummaryEntry(BaseModel):
 class WorkoutsPerDay(BaseModel):
     date: date
     count: int
-
+    total_weight: float
 
 class CaloriesPerDay(BaseModel):
     date: date
