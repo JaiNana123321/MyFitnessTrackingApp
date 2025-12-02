@@ -1,0 +1,46 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16
+    container_name: fullstack_db
+    environment:
+      POSTGRES_USER: appuser
+      POSTGRES_PASSWORD: apppass
+      POSTGRES_DB: appdb
+    ports:
+      - "5432:5432"          # so you can connect from host (e.g. psql, DBeaver)
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    container_name: fullstack_backend
+    environment:
+      # service name "db" is the hostname inside the Docker network
+      DATABASE_URL: postgresql://appuser:apppass@db:5432/appdb
+    depends_on:
+      - db
+    volumes:
+      - ./backend:/app       # live code reloading during dev
+    ports:
+      - "8000:8000"          # FastAPI/Flask exposed here
+    command: >
+      uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    build: ./frontend
+    container_name: fullstack_frontend
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app      # live reload for Streamlit
+    ports:
+      - "8501:8501"          # Streamlit default port
+    environment:
+      BACKEND_URL: http://backend:8000
+    command: >
+      streamlit run app.py --server.port 8501 --server.address 0.0.0.0
+
+volumes:
+  db-data:
