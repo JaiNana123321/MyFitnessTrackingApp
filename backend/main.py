@@ -14,3 +14,4 @@ def on_startup():
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
