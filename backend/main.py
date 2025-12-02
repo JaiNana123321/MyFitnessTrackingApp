@@ -505,7 +505,6 @@ def user_summary(
     db: Session = Depends(get_db),
 ):
     cutoff_date = (datetime.utcnow() - timedelta(days=days)).date()
-
     # Sleep summary per entry (later grouped in frontend if needed)
     # SQL: SELECT * FROM sleep WHERE user_id = :user_id AND start_time >= :cutoff ORDER BY start_time ASC;
     sleeps = (
@@ -614,3 +613,115 @@ def user_summary(
         workouts_per_day=workouts_per_day,
         calories_per_day=calories_per_day,
     )
+
+
+# Get personal records (PRs) for a user for every exercise.
+# For each exercise, we return the maximum weight_amount the user has lifted.
+# If the user has never done a given exercise, its PR is reported as 0.
+@app.get("/users/{user_id}/PR", response_model=List[schemas.ExercisePR])
+def get_user_prs(user_id: int, db: Session = Depends(get_db)):
+    # SQL (subquery):
+    #   SELECT ws.exercise_id,
+    #          MAX(ws.weight_amount) AS pr_weight
+    #   FROM workout_sets ws
+    #   JOIN workouts w ON ws.workout_id = w.workout_id
+    #   WHERE w.user_id = :user_id
+    #   GROUP BY ws.exercise_id;
+
+    pr_subq = (
+        db.query(
+            models.WorkoutSet.exercise_id.label("exercise_id"),
+            func.max(models.WorkoutSet.weight_amount).label("pr_weight"),
+        )
+        .join(models.Workout, models.WorkoutSet.workout_id == models.Workout.workout_id)
+        .filter(models.Workout.user_id == user_id)
+        .group_by(models.WorkoutSet.exercise_id)
+        .subquery()
+    )
+
+    # SQL:
+    #   SELECT e.exercise_id,
+    #          e.exercise_name,
+    #          COALESCE(pr_subq.pr_weight, 0) AS pr_weight
+    #   FROM exercises e
+    #   LEFT JOIN pr_subq ON e.exercise_id = pr_subq.exercise_id
+    #   ORDER BY e.exercise_name ASC;
+
+    rows = (
+        db.query(
+            models.Exercise.exercise_id,
+            models.Exercise.exercise_name,
+            func.coalesce(pr_subq.c.pr_weight, 0.0).label("pr_weight"),
+        )
+        .outerjoin(pr_subq, models.Exercise.exercise_id == pr_subq.c.exercise_id)
+        .order_by(models.Exercise.exercise_name.asc())
+        .all()
+    )
+
+    prs = [
+        schemas.ExercisePR(
+            exercise_id=row.exercise_id,
+            exercise_name=row.exercise_name,
+            pr_weight=float(row.pr_weight or 0.0),
+        )
+        for row in rows
+    ]
+
+    return prs
+
+
+# Get weekly muscle-balance data for a user:
+# For each week and each primary_muscle, compute total volume = SUM(num_reps * weight_amount).
+@app.get("/users/{user_id}/Muscle-Balance", response_model=List[schemas.MuscleBalanceEntry])
+def muscle_balance(
+    user_id: int,
+    weeks: int = Query(8, ge=1, le=52),  # look back this many weeks
+    db: Session = Depends(get_db),
+):
+    cutoff_dt = datetime.utcnow() - timedelta(weeks=weeks)
+
+    # SQL: SELECT date_trunc('week', w.start_time) AS week_start, e.primary_muscle, SUM(ws.num_reps * ws.weight_amount) AS volume 
+    # FROM workouts w 
+    # JOIN workout_sets ws ON ws.workout_id = w.workout_id 
+    # JOIN exercises e ON e.exercise_id = ws.exercise_id 
+    # WHERE w.user_id = :user_id AND w.start_time >= :cutoff_dt 
+    # GROUP BY date_trunc('week', w.start_time), e.primary_muscle 
+    # ORDER BY week_start DESC, e.primary_muscle ASC;
+    rows = (
+        db.query(
+            func.date_trunc("week", models.Workout.start_time).label("week_start"),
+            models.Exercise.primary_muscle.label("primary_muscle"),
+            func.sum(
+                models.WorkoutSet.num_reps * models.WorkoutSet.weight_amount
+            ).label("volume"),
+        )
+        .join(models.WorkoutSet, models.Workout.workout_id == models.WorkoutSet.workout_id)
+        .join(models.Exercise, models.WorkoutSet.exercise_id == models.Exercise.exercise_id)
+        .filter(
+            models.Workout.user_id == user_id,
+            models.Workout.start_time >= cutoff_dt,
+        )
+        .group_by(
+            func.date_trunc("week", models.Workout.start_time),
+            models.Exercise.primary_muscle,
+        )
+        .order_by(
+            func.date_trunc("week", models.Workout.start_time).desc(),
+            models.Exercise.primary_muscle.asc(),
+        )
+        .all()
+    )
+
+    entries: List[schemas.MuscleBalanceEntry] = []
+    for row in rows:
+        # row.week_start is a datetime from date_trunc('week', ...); convert to date
+        week_start_date = row.week_start.date() if hasattr(row.week_start, "date") else row.week_start
+        entries.append(
+            schemas.MuscleBalanceEntry(
+                week_start=week_start_date,
+                primary_muscle=row.primary_muscle or "Unknown",
+                volume=float(row.volume or 0.0),
+            )
+        )
+
+    return entries

@@ -1,0 +1,918 @@
+openapi: 3.0.3
+info:
+  title: Workoutify API
+  version: 1.0.0
+  description: >
+    Backend API for Workoutify: users, sleep, workouts, exercises, meals, foods,
+    summaries, PRs, and muscle balance.
+
+servers:
+  - url: http://localhost:8000
+    description: Local dev
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+  /users/login:
+    post:
+      summary: Login or create user
+      description: >
+        Idempotent login endpoint. If user with given email exists, returns it.
+        Otherwise creates a new user.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLoginRequest'
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /users/{user_id}/summary:
+    get:
+      summary: User summary
+      description: >
+        Returns sleep, workouts-per-day, and calories/macros per day for the last N days.
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: days
+          required: false
+          schema:
+            type: integer
+            default: 7
+      responses:
+        '200':
+          description: User summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSummary'
+
+  /users/{user_id}/PR:
+    get:
+      summary: Personal records per exercise
+      description: >
+        For every exercise, returns the max weight lifted by this user.
+        If the user has never done an exercise, its PR is 0.
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of PRs by exercise
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ExercisePR'
+
+  /users/{user_id}/Muscle-Balance:
+    get:
+      summary: Muscle balance by week
+      description: >
+        For each week and primary muscle group, returns total volume
+        (sum of reps * weight) over the last N weeks.
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: weeks
+          required: false
+          schema:
+            type: integer
+            default: 8
+            minimum: 1
+            maximum: 52
+      responses:
+        '200':
+          description: Weekly volume per primary muscle
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MuscleBalanceEntry'
+
+  /sleep:
+    post:
+      summary: Create sleep entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SleepCreate'
+      responses:
+        '200':
+          description: Created sleep entry
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sleep'
+    get:
+      summary: List all sleep for a user
+      parameters:
+        - in: query
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Sleep entries for user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Sleep'
+
+  /sleep/recent:
+    get:
+      summary: Recent sleep entries
+      parameters:
+        - in: query
+          name: user_id
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: days
+          required: false
+          schema:
+            type: integer
+            default: 7
+      responses:
+        '200':
+          description: Recent sleep entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Sleep'
+
+  /sleep/{sleep_id}:
+    delete:
+      summary: Delete sleep entry
+      parameters:
+        - in: path
+          name: sleep_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+
+  /workouts:
+    post:
+      summary: Create workout
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkoutCreate'
+      responses:
+        '200':
+          description: Created workout
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workout'
+    get:
+      summary: List all workouts for a user
+      parameters:
+        - in: query
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Workouts for user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Workout'
+
+  /workouts/recent:
+    get:
+      summary: Recent workouts
+      parameters:
+        - in: query
+          name: user_id
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: days
+          required: false
+          schema:
+            type: integer
+            default: 7
+      responses:
+        '200':
+          description: Recent workouts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Workout'
+
+  /workouts/{workout_id}:
+    delete:
+      summary: Delete workout
+      parameters:
+        - in: path
+          name: workout_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+
+  /workout_sets:
+    post:
+      summary: Create workout set
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkoutSetCreate'
+      responses:
+        '200':
+          description: Created workout set
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkoutSet'
+
+  /workout_sets/{set_id}:
+    delete:
+      summary: Delete workout set
+      parameters:
+        - in: path
+          name: set_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+
+  /foods:
+    post:
+      summary: Create food
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FoodCreate'
+      responses:
+        '200':
+          description: Created food
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Food'
+    get:
+      summary: List all foods
+      responses:
+        '200':
+          description: All foods
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Food'
+
+  /foods/search:
+    get:
+      summary: Search foods
+      parameters:
+        - in: query
+          name: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Filtered foods
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Food'
+
+  /foods/{food_id}:
+    delete:
+      summary: Delete food
+      parameters:
+        - in: path
+          name: food_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+
+  /meals:
+    post:
+      summary: Create meal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MealCreate'
+      responses:
+        '200':
+          description: Created meal
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Meal'
+    get:
+      summary: List all meals for a user
+      parameters:
+        - in: query
+          name: user_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Meals for user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Meal'
+
+  /meals/recent:
+    get:
+      summary: Recent meals
+      parameters:
+        - in: query
+          name: user_id
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: days
+          required: false
+          schema:
+            type: integer
+            default: 7
+      responses:
+        '200':
+          description: Recent meals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Meal'
+
+  /meals/{meal_id}:
+    delete:
+      summary: Delete meal
+      parameters:
+        - in: path
+          name: meal_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+
+  /meal_items:
+    post:
+      summary: Create meal item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MealItemCreate'
+      responses:
+        '200':
+          description: Created meal item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MealItem'
+
+  /meal_items/{meal_item_id}:
+    delete:
+      summary: Delete meal item
+      parameters:
+        - in: path
+          name: meal_item_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+
+  /exercises:
+    post:
+      summary: Create exercise
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExerciseCreate'
+      responses:
+        '200':
+          description: Created exercise
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Exercise'
+    get:
+      summary: List all exercises
+      responses:
+        '200':
+          description: All exercises
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Exercise'
+
+  /exercises/{exercise_id}:
+    delete:
+      summary: Delete exercise
+      parameters:
+        - in: path
+          name: exercise_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResponse'
+
+components:
+  schemas:
+    DeleteResponse:
+      type: object
+      properties:
+        detail:
+          type: string
+          example: deleted
+
+    # ----- Users -----
+    UserLoginRequest:
+      type: object
+      required:
+        - email
+        - name
+        - surname
+      properties:
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        surname:
+          type: string
+
+    User:
+      type: object
+      properties:
+        user_id:
+          type: integer
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        surname:
+          type: string
+        location:
+          type: string
+          nullable: true
+
+    # ----- Sleep -----
+    SleepCreate:
+      type: object
+      required:
+        - user_id
+        - start_time
+        - end_time
+      properties:
+        user_id:
+          type: integer
+        start_time:
+          type: string
+          format: date-time
+        end_time:
+          type: string
+          format: date-time
+        quality_score:
+          type: integer
+          minimum: 1
+          maximum: 10
+          nullable: true
+
+    Sleep:
+      type: object
+      properties:
+        sleep_id:
+          type: integer
+        user_id:
+          type: integer
+        start_time:
+          type: string
+          format: date-time
+        end_time:
+          type: string
+          format: date-time
+        quality_score:
+          type: integer
+          nullable: true
+
+    # ----- Workouts -----
+    WorkoutCreate:
+      type: object
+      required:
+        - user_id
+        - start_time
+        - end_time
+      properties:
+        user_id:
+          type: integer
+        start_time:
+          type: string
+          format: date-time
+        end_time:
+          type: string
+          format: date-time
+        label:
+          type: string
+          nullable: true
+
+    Workout:
+      type: object
+      properties:
+        workout_id:
+          type: integer
+        user_id:
+          type: integer
+        start_time:
+          type: string
+          format: date-time
+        end_time:
+          type: string
+          format: date-time
+        label:
+          type: string
+          nullable: true
+
+    WorkoutSetCreate:
+      type: object
+      required:
+        - workout_id
+        - exercise_id
+        - num_reps
+        - weight_amount
+        - set_order
+      properties:
+        workout_id:
+          type: integer
+        exercise_id:
+          type: integer
+        num_reps:
+          type: integer
+        weight_amount:
+          type: number
+          format: float
+        set_order:
+          type: integer
+
+    WorkoutSet:
+      type: object
+      properties:
+        set_id:
+          type: integer
+        workout_id:
+          type: integer
+        exercise_id:
+          type: integer
+        num_reps:
+          type: integer
+        weight_amount:
+          type: number
+          format: float
+        set_order:
+          type: integer
+
+    # ----- Foods -----
+    FoodCreate:
+      type: object
+      required:
+        - food_name
+        - calories
+        - carbs
+        - fats
+        - protein
+        - sugar
+        - category
+        - serving_size_grams
+      properties:
+        food_name:
+          type: string
+        calories:
+          type: number
+          format: float
+        carbs:
+          type: number
+          format: float
+        fats:
+          type: number
+          format: float
+        protein:
+          type: number
+          format: float
+        sugar:
+          type: number
+          format: float
+        category:
+          type: string
+        serving_size_grams:
+          type: number
+          format: float
+
+    Food:
+      type: object
+      properties:
+        food_id:
+          type: integer
+        food_name:
+          type: string
+        calories:
+          type: number
+          format: float
+        carbs:
+          type: number
+          format: float
+        fats:
+          type: number
+          format: float
+        protein:
+          type: number
+          format: float
+        sugar:
+          type: number
+          format: float
+        category:
+          type: string
+        serving_size_grams:
+          type: number
+          format: float
+
+    # ----- Meals -----
+    MealCreate:
+      type: object
+      required:
+        - user_id
+        - time_of_meal
+        - meal_name
+      properties:
+        user_id:
+          type: integer
+        time_of_meal:
+          type: string
+          format: date-time
+        meal_name:
+          type: string
+
+    Meal:
+      type: object
+      properties:
+        meal_id:
+          type: integer
+        user_id:
+          type: integer
+        time_of_meal:
+          type: string
+          format: date-time
+        meal_name:
+          type: string
+
+    MealItemCreate:
+      type: object
+      required:
+        - meal_id
+        - food_id
+        - quantity
+      properties:
+        meal_id:
+          type: integer
+        food_id:
+          type: integer
+        quantity:
+          type: number
+          format: float
+
+    MealItem:
+      type: object
+      properties:
+        meal_item_id:
+          type: integer
+        meal_id:
+          type: integer
+        food_id:
+          type: integer
+        quantity:
+          type: number
+          format: float
+
+    # ----- Exercises -----
+    ExerciseCreate:
+      type: object
+      required:
+        - exercise_name
+      properties:
+        exercise_name:
+          type: string
+        primary_muscle:
+          type: string
+          nullable: true
+        secondary_muscle:
+          type: string
+          nullable: true
+
+    Exercise:
+      type: object
+      properties:
+        exercise_id:
+          type: integer
+        exercise_name:
+          type: string
+        primary_muscle:
+          type: string
+          nullable: true
+        secondary_muscle:
+          type: string
+          nullable: true
+
+    # ----- Summary & Analytics -----
+    SummarySleepEntry:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        hours:
+          type: number
+          format: float
+        quality_score:
+          type: number
+          format: float
+
+    SummaryWorkoutDay:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        count:
+          type: integer
+        total_weight:
+          type: number
+          format: float
+
+    SummaryCaloriesDay:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        calories:
+          type: number
+          format: float
+        carbs:
+          type: number
+          format: float
+        fats:
+          type: number
+          format: float
+        protein:
+          type: number
+          format: float
+
+    UserSummary:
+      type: object
+      properties:
+        sleep:
+          type: array
+          items:
+            $ref: '#/components/schemas/SummarySleepEntry'
+        workouts_per_day:
+          type: array
+          items:
+            $ref: '#/components/schemas/SummaryWorkoutDay'
+        calories_per_day:
+          type: array
+          items:
+            $ref: '#/components/schemas/SummaryCaloriesDay'
+
+    ExercisePR:
+      type: object
+      properties:
+        exercise_id:
+          type: integer
+        exercise_name:
+          type: string
+        pr_weight:
+          type: number
+          format: float
+
+    MuscleBalanceEntry:
+      type: object
+      properties:
+        week_start:
+          type: string
+          format: date
+        primary_muscle:
+          type: string
+        volume:
+          type: number
+          format: float

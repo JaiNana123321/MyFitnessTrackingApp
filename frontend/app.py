@@ -437,7 +437,7 @@ def workout_form():
     # Fetch exercises from backend for dropdown
     exercises = get_all_exercises()
     if not exercises:
-        st.warning("No exercises available. Please seed or add exercises in backend.")
+        st.warning("No exercises available. Please add exercises.")
 
     exercise_labels = [
         f"{ex['exercise_name']} (id {ex['exercise_id']})" for ex in exercises
@@ -462,7 +462,7 @@ def workout_form():
     num_sets = st.number_input(
         "Number of sets",
         min_value=1,
-        max_value=10,
+        max_value=30,
         value=3,
         step=1,
     )

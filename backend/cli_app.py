@@ -1,4 +1,3 @@
-# cli_interactive.py
 """
 Interactive CLI for inspecting and deleting data in the Workoutify database.
 
@@ -9,9 +8,6 @@ Interactive CLI for inspecting and deleting data in the Workoutify database.
 
 Run with:
     python cli_interactive.py
-
-If using Docker:
-    docker compose exec backend python cli_interactive.py
 """
 
 from typing import Callable, Dict, Any

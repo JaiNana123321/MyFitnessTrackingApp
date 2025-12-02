@@ -103,8 +103,6 @@ class WorkoutSummary(BaseModel):
 
 # ---------- Foods ----------
 
-# schemas.py (only the relevant parts)
-
 class FoodCreate(BaseModel):
     food_name: str
     calories: float
@@ -113,7 +111,7 @@ class FoodCreate(BaseModel):
     protein: float
     sugar: float
     category: str
-    serving_size_grams: float  # new field
+    serving_size_grams: float
 
 
 class FoodOut(BaseModel):
@@ -125,7 +123,7 @@ class FoodOut(BaseModel):
     protein: float
     sugar: float
     category: str
-    serving_size_grams: float  # new field
+    serving_size_grams: float
 
     class Config:
         orm_mode = True
@@ -179,6 +177,22 @@ class ExerciseOut(BaseModel):
     class Config:
         orm_mode = True
 
+
+class ExercisePR(BaseModel):
+    exercise_id: int
+    exercise_name: str
+    pr_weight: float  # max weight_amount this user has ever used for that exercise
+
+    class Config:
+        orm_mode = True
+
+class MuscleBalanceEntry(BaseModel):
+    week_start: date          # Monday (or DB's week start) of that training week
+    primary_muscle: str
+    volume: float             # sum of num_reps * weight_amount for that week + muscle
+
+    class Config:
+        orm_mode = True
 
 # ---------- Dashboard Summary ----------
 
