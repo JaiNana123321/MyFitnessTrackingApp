@@ -1,0 +1,2207 @@
+{
+	"info": {
+		"_postman_id": "1b378c3d-abc2-4345-845d-ac133d2cddd5",
+		"name": "Workoutify API",
+		"description": "Backend API for Workoutify: users, sleep, workouts, exercises, meals, foods, summaries, PRs, and muscle balance.\n",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "41546456"
+	},
+	"item": [
+		{
+			"name": "health",
+			"item": [
+				{
+					"name": "Health check",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/health",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"health"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "API is healthy",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/health",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"health"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"status\": \"ok\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "users",
+			"item": [
+				{
+					"name": "login",
+					"item": [
+						{
+							"name": "Login or create user",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"jai.nana@gmail.com\",\n  \"name\": \"jai\",\n  \"surname\": \"nana\"\n}",
+									"options": {
+										"raw": {
+											"headerFamily": "json",
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/users/login",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users",
+										"login"
+									]
+								},
+								"description": "Idempotent login endpoint. If user with given email exists, returns it. Otherwise creates a new user.\n"
+							},
+							"response": [
+								{
+									"name": "User profile",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"email\": \"Bz8H7vep@ufPKWen.dmbv\",\n  \"name\": \"string\",\n  \"surname\": \"string\"\n}",
+											"options": {
+												"raw": {
+													"headerFamily": "json",
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{baseUrl}}/users/login",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"users",
+												"login"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"user_id\": 8690,\n  \"email\": \"i8Gwn@F.bau\",\n  \"name\": \"string\",\n  \"surname\": \"string\",\n  \"location\": \"string\"\n}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "{user_id}",
+					"item": [
+						{
+							"name": "summary",
+							"item": [
+								{
+									"name": "User summary",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/users/:user_id/summary?days=1",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"users",
+												":user_id",
+												"summary"
+											],
+											"query": [
+												{
+													"key": "days",
+													"value": "1"
+												}
+											],
+											"variable": [
+												{
+													"key": "user_id",
+													"value": "2"
+												}
+											]
+										},
+										"description": "Returns sleep, workouts-per-day, and calories/macros per day for the last N days.\n"
+									},
+									"response": [
+										{
+											"name": "User summary",
+											"originalRequest": {
+												"method": "GET",
+												"header": [
+													{
+														"key": "Accept",
+														"value": "application/json"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/users/:user_id/summary?days=7",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"users",
+														":user_id",
+														"summary"
+													],
+													"query": [
+														{
+															"key": "days",
+															"value": "7"
+														}
+													],
+													"variable": [
+														{
+															"key": "user_id",
+															"value": "6453"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "{\n  \"sleep\": [\n    {\n      \"date\": \"1961-01-30\",\n      \"hours\": 6515.593749963675,\n      \"quality_score\": 7606.98223304415\n    },\n    {\n      \"date\": \"2002-10-01\",\n      \"hours\": 5794.010216501338,\n      \"quality_score\": 6027.031880396116\n    }\n  ],\n  \"workouts_per_day\": [\n    {\n      \"date\": \"2021-03-28\",\n      \"count\": 4835,\n      \"total_weight\": 6538.712192445903\n    },\n    {\n      \"date\": \"1992-08-15\",\n      \"count\": 6241,\n      \"total_weight\": 6214.716696558571\n    }\n  ],\n  \"calories_per_day\": [\n    {\n      \"date\": \"1954-08-02\",\n      \"calories\": 116.45630847888499,\n      \"carbs\": 7821.318598473512,\n      \"fats\": 9975.681187553013,\n      \"protein\": 3403.804520671798\n    },\n    {\n      \"date\": \"1956-12-18\",\n      \"calories\": 8898.470333391648,\n      \"carbs\": 8843.633970011826,\n      \"fats\": 2230.8736933734986,\n      \"protein\": 1022.5139681236284\n    }\n  ]\n}"
+										}
+									]
+								}
+							]
+						},
+						{
+							"name": "PR",
+							"item": [
+								{
+									"name": "Personal records per exercise",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/users/:user_id/PR",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"users",
+												":user_id",
+												"PR"
+											],
+											"variable": [
+												{
+													"key": "user_id",
+													"value": "1"
+												}
+											]
+										},
+										"description": "For every exercise, returns the max weight lifted by this user. If the user has never done an exercise, its PR is 0.\n"
+									},
+									"response": [
+										{
+											"name": "List of PRs by exercise",
+											"originalRequest": {
+												"method": "GET",
+												"header": [
+													{
+														"key": "Accept",
+														"value": "application/json"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/users/:user_id/PR",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"users",
+														":user_id",
+														"PR"
+													],
+													"variable": [
+														{
+															"key": "user_id",
+															"value": "6453"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "[\n  {\n    \"exercise_id\": 2956,\n    \"exercise_name\": \"string\",\n    \"pr_weight\": 3403.5456072301763\n  },\n  {\n    \"exercise_id\": 8327,\n    \"exercise_name\": \"string\",\n    \"pr_weight\": 8953.908111749555\n  }\n]"
+										}
+									]
+								}
+							]
+						},
+						{
+							"name": "Muscle-Balance",
+							"item": [
+								{
+									"name": "Muscle balance by week",
+									"request": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/users/:user_id/Muscle-Balance?weeks=8",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"users",
+												":user_id",
+												"Muscle-Balance"
+											],
+											"query": [
+												{
+													"key": "weeks",
+													"value": "8"
+												}
+											],
+											"variable": [
+												{
+													"key": "user_id",
+													"value": "1"
+												},
+												{
+													"key": "user_id",
+													"value": "q"
+												}
+											]
+										},
+										"description": "For each week and primary muscle group, returns total volume (sum of reps * weight) over the last N weeks.\n"
+									},
+									"response": [
+										{
+											"name": "Weekly volume per primary muscle",
+											"originalRequest": {
+												"method": "GET",
+												"header": [
+													{
+														"key": "Accept",
+														"value": "application/json"
+													}
+												],
+												"url": {
+													"raw": "{{baseUrl}}/users/:user_id/Muscle-Balance?weeks=8",
+													"host": [
+														"{{baseUrl}}"
+													],
+													"path": [
+														"users",
+														":user_id",
+														"Muscle-Balance"
+													],
+													"query": [
+														{
+															"key": "weeks",
+															"value": "8"
+														}
+													],
+													"variable": [
+														{
+															"key": "user_id",
+															"value": "6453"
+														}
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json"
+												}
+											],
+											"cookie": [],
+											"body": "[\n  {\n    \"week_start\": \"1977-12-01\",\n    \"primary_muscle\": \"string\",\n    \"volume\": 2285.6742631616967\n  },\n  {\n    \"week_start\": \"2015-09-23\",\n    \"primary_muscle\": \"string\",\n    \"volume\": 2439.1278888747015\n  }\n]"
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "sleep",
+			"item": [
+				{
+					"name": "recent",
+					"item": [
+						{
+							"name": "Recent sleep entries",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/sleep/recent?user_id=1&days=7",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"sleep",
+										"recent"
+									],
+									"query": [
+										{
+											"key": "user_id",
+											"value": "1"
+										},
+										{
+											"key": "days",
+											"value": "7"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Recent sleep entries",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/sleep/recent?user_id=6453&days=7",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"sleep",
+												"recent"
+											],
+											"query": [
+												{
+													"key": "user_id",
+													"value": "6453"
+												},
+												{
+													"key": "days",
+													"value": "7"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "[\n  {\n    \"sleep_id\": 625,\n    \"user_id\": 2459,\n    \"start_time\": \"2017-06-04T19:12:42.465Z\",\n    \"end_time\": \"1953-06-28T18:13:43.897Z\",\n    \"quality_score\": 1133\n  },\n  {\n    \"sleep_id\": 6887,\n    \"user_id\": 755,\n    \"start_time\": \"1977-07-02T05:56:05.397Z\",\n    \"end_time\": \"1954-04-08T07:58:52.466Z\",\n    \"quality_score\": 561\n  }\n]"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "{sleep_id}",
+					"item": [
+						{
+							"name": "Delete sleep entry",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/sleep/:sleep_id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"sleep",
+										":sleep_id"
+									],
+									"variable": [
+										{
+											"key": "sleep_id",
+											"value": "6453"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Deleted",
+									"originalRequest": {
+										"method": "DELETE",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/sleep/:sleep_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"sleep",
+												":sleep_id"
+											],
+											"variable": [
+												{
+													"key": "sleep_id",
+													"value": "6453"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"detail\": \"deleted\"\n}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "Create sleep entry",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"user_id\": 1390,\n  \"start_time\": \"1955-06-01T04:12:31.013Z\",\n  \"end_time\": \"2009-08-20T05:54:38.012Z\",\n  \"quality_score\": 3\n}",
+							"options": {
+								"raw": {
+									"headerFamily": "json",
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/sleep",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"sleep"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Created sleep entry",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"user_id\": 1390,\n  \"start_time\": \"1955-06-01T04:12:31.013Z\",\n  \"end_time\": \"2009-08-20T05:54:38.012Z\",\n  \"quality_score\": 3\n}",
+									"options": {
+										"raw": {
+											"headerFamily": "json",
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/sleep",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"sleep"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"sleep_id\": 6811,\n  \"user_id\": 4057,\n  \"start_time\": \"2016-05-30T00:20:03.523Z\",\n  \"end_time\": \"2014-08-26T06:45:38.162Z\",\n  \"quality_score\": 9843\n}"
+						}
+					]
+				},
+				{
+					"name": "List all sleep for a user",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/sleep/all/?user_id=1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"sleep",
+								"all",
+								""
+							],
+							"query": [
+								{
+									"key": "user_id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Sleep entries for user",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/sleep?user_id=6453",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"sleep"
+									],
+									"query": [
+										{
+											"key": "user_id",
+											"value": "6453"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "[\n  {\n    \"sleep_id\": 625,\n    \"user_id\": 2459,\n    \"start_time\": \"2017-06-04T19:12:42.465Z\",\n    \"end_time\": \"1953-06-28T18:13:43.897Z\",\n    \"quality_score\": 1133\n  },\n  {\n    \"sleep_id\": 6887,\n    \"user_id\": 755,\n    \"start_time\": \"1977-07-02T05:56:05.397Z\",\n    \"end_time\": \"1954-04-08T07:58:52.466Z\",\n    \"quality_score\": 561\n  }\n]"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "workouts",
+			"item": [
+				{
+					"name": "recent",
+					"item": [
+						{
+							"name": "Recent workouts",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/workouts/recent?user_id=1&days=7",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"workouts",
+										"recent"
+									],
+									"query": [
+										{
+											"key": "user_id",
+											"value": "1"
+										},
+										{
+											"key": "days",
+											"value": "7"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Recent workouts",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/workouts/recent?user_id=6453&days=7",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"workouts",
+												"recent"
+											],
+											"query": [
+												{
+													"key": "user_id",
+													"value": "6453"
+												},
+												{
+													"key": "days",
+													"value": "7"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "[\n  {\n    \"workout_id\": 3229,\n    \"user_id\": 1372,\n    \"start_time\": \"1984-10-18T08:22:30.488Z\",\n    \"end_time\": \"1953-03-22T03:43:52.055Z\",\n    \"label\": \"string\"\n  },\n  {\n    \"workout_id\": 7444,\n    \"user_id\": 1014,\n    \"start_time\": \"1991-10-17T08:27:36.318Z\",\n    \"end_time\": \"1955-04-15T18:59:36.433Z\",\n    \"label\": \"string\"\n  }\n]"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "{workout_id}",
+					"item": [
+						{
+							"name": "Delete workout",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/workouts/:workout_id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"workouts",
+										":workout_id"
+									],
+									"variable": [
+										{
+											"key": "workout_id",
+											"value": "6453"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Deleted",
+									"originalRequest": {
+										"method": "DELETE",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/workouts/:workout_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"workouts",
+												":workout_id"
+											],
+											"variable": [
+												{
+													"key": "workout_id",
+													"value": "6453"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"detail\": \"deleted\"\n}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "Create workout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"user_id\": 1,\n  \"start_time\": \"1947-04-14T22:38:05.558Z\",\n  \"end_time\": \"2007-07-08T01:00:50.662Z\",\n  \"label\": \"string\"\n}",
+							"options": {
+								"raw": {
+									"headerFamily": "json",
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/workouts",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"workouts"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Created workout",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"user_id\": 2763,\n  \"start_time\": \"1947-04-14T22:38:05.558Z\",\n  \"end_time\": \"2007-07-08T01:00:50.662Z\",\n  \"label\": \"string\"\n}",
+									"options": {
+										"raw": {
+											"headerFamily": "json",
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/workouts",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"workouts"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"workout_id\": 3304,\n  \"user_id\": 1010,\n  \"start_time\": \"1966-01-31T00:48:59.385Z\",\n  \"end_time\": \"2021-01-12T16:15:27.572Z\",\n  \"label\": \"string\"\n}"
+						}
+					]
+				},
+				{
+					"name": "List all workouts for a user",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/workouts/all?user_id=1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"workouts",
+								"all"
+							],
+							"query": [
+								{
+									"key": "user_id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Workouts for user",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/workouts?user_id=6453",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"workouts"
+									],
+									"query": [
+										{
+											"key": "user_id",
+											"value": "6453"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "[\n  {\n    \"workout_id\": 3229,\n    \"user_id\": 1372,\n    \"start_time\": \"1984-10-18T08:22:30.488Z\",\n    \"end_time\": \"1953-03-22T03:43:52.055Z\",\n    \"label\": \"string\"\n  },\n  {\n    \"workout_id\": 7444,\n    \"user_id\": 1014,\n    \"start_time\": \"1991-10-17T08:27:36.318Z\",\n    \"end_time\": \"1955-04-15T18:59:36.433Z\",\n    \"label\": \"string\"\n  }\n]"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "workout_sets",
+			"item": [
+				{
+					"name": "{set_id}",
+					"item": [
+						{
+							"name": "Delete workout set",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/workout_sets/:set_id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"workout_sets",
+										":set_id"
+									],
+									"variable": [
+										{
+											"key": "set_id",
+											"value": "6453"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Deleted",
+									"originalRequest": {
+										"method": "DELETE",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/workout_sets/:set_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"workout_sets",
+												":set_id"
+											],
+											"variable": [
+												{
+													"key": "set_id",
+													"value": "6453"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"detail\": \"deleted\"\n}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "Create workout set",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"workout_id\": 1,\n  \"exercise_id\": 3,\n  \"num_reps\": 4209,\n  \"weight_amount\": 7192.7938328674145,\n  \"set_order\": 6757\n}",
+							"options": {
+								"raw": {
+									"headerFamily": "json",
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/workout_sets",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"workout_sets"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Created workout set",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"workout_id\": 7308,\n  \"exercise_id\": 67,\n  \"num_reps\": 4209,\n  \"weight_amount\": 7192.7938328674145,\n  \"set_order\": 6757\n}",
+									"options": {
+										"raw": {
+											"headerFamily": "json",
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/workout_sets",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"workout_sets"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"set_id\": 9968,\n  \"workout_id\": 4986,\n  \"exercise_id\": 3492,\n  \"num_reps\": 8196,\n  \"weight_amount\": 5299.615089183684,\n  \"set_order\": 1691\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "foods",
+			"item": [
+				{
+					"name": "search",
+					"item": [
+						{
+							"name": "Search foods",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/foods/search?query=Banana",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"foods",
+										"search"
+									],
+									"query": [
+										{
+											"key": "query",
+											"value": "Banana"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Filtered foods",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/foods/search?query=string",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"foods",
+												"search"
+											],
+											"query": [
+												{
+													"key": "query",
+													"value": "string"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "[\n  {\n    \"food_id\": 6584,\n    \"food_name\": \"string\",\n    \"calories\": 3143.5754971270712,\n    \"carbs\": 2031.8372514948435,\n    \"fats\": 6573.466572664106,\n    \"protein\": 7058.361687693339,\n    \"sugar\": 9124.892966714453,\n    \"category\": \"string\",\n    \"serving_size_grams\": 4789.766439133611\n  },\n  {\n    \"food_id\": 6675,\n    \"food_name\": \"string\",\n    \"calories\": 7066.548191219468,\n    \"carbs\": 4812.865230025538,\n    \"fats\": 9821.127644255568,\n    \"protein\": 1791.869764711107,\n    \"sugar\": 7061.510621528262,\n    \"category\": \"string\",\n    \"serving_size_grams\": 1319.589594378634\n  }\n]"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "{food_id}",
+					"item": [
+						{
+							"name": "Delete food",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/foods/:food_id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"foods",
+										":food_id"
+									],
+									"variable": [
+										{
+											"key": "food_id",
+											"value": "6453"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Deleted",
+									"originalRequest": {
+										"method": "DELETE",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/foods/:food_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"foods",
+												":food_id"
+											],
+											"variable": [
+												{
+													"key": "food_id",
+													"value": "6453"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"detail\": \"deleted\"\n}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "Create food",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"food_name\": \"new_food\",\n  \"calories\": 6500.7801874505185,\n  \"carbs\": 8935.728348383635,\n  \"fats\": 1141.1885762300033,\n  \"protein\": 7327.846237662629,\n  \"sugar\": 4437.917125147779,\n  \"category\": \"string\",\n  \"serving_size_grams\": 2854.749821647482\n}",
+							"options": {
+								"raw": {
+									"headerFamily": "json",
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/foods",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"foods"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Created food",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"food_name\": \"string\",\n  \"calories\": 6500.7801874505185,\n  \"carbs\": 8935.728348383635,\n  \"fats\": 1141.1885762300033,\n  \"protein\": 7327.846237662629,\n  \"sugar\": 4437.917125147779,\n  \"category\": \"string\",\n  \"serving_size_grams\": 2854.749821647482\n}",
+									"options": {
+										"raw": {
+											"headerFamily": "json",
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/foods",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"foods"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"food_id\": 9973,\n  \"food_name\": \"string\",\n  \"calories\": 9979.069440564755,\n  \"carbs\": 6444.099704756601,\n  \"fats\": 8610.954504384457,\n  \"protein\": 6086.95720457001,\n  \"sugar\": 3415.2975366900073,\n  \"category\": \"string\",\n  \"serving_size_grams\": 2427.521974903344\n}"
+						}
+					]
+				},
+				{
+					"name": "List all foods",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/foods/all",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"foods",
+								"all"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "All foods",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/foods",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"foods"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "[\n  {\n    \"food_id\": 6584,\n    \"food_name\": \"string\",\n    \"calories\": 3143.5754971270712,\n    \"carbs\": 2031.8372514948435,\n    \"fats\": 6573.466572664106,\n    \"protein\": 7058.361687693339,\n    \"sugar\": 9124.892966714453,\n    \"category\": \"string\",\n    \"serving_size_grams\": 4789.766439133611\n  },\n  {\n    \"food_id\": 6675,\n    \"food_name\": \"string\",\n    \"calories\": 7066.548191219468,\n    \"carbs\": 4812.865230025538,\n    \"fats\": 9821.127644255568,\n    \"protein\": 1791.869764711107,\n    \"sugar\": 7061.510621528262,\n    \"category\": \"string\",\n    \"serving_size_grams\": 1319.589594378634\n  }\n]"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "meals",
+			"item": [
+				{
+					"name": "recent",
+					"item": [
+						{
+							"name": "Recent meals",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/meals/recent?user_id=1&days=7",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"meals",
+										"recent"
+									],
+									"query": [
+										{
+											"key": "user_id",
+											"value": "1"
+										},
+										{
+											"key": "days",
+											"value": "7"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Recent meals",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/meals/recent?user_id=6453&days=7",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"meals",
+												"recent"
+											],
+											"query": [
+												{
+													"key": "user_id",
+													"value": "6453"
+												},
+												{
+													"key": "days",
+													"value": "7"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "[\n  {\n    \"meal_id\": 661,\n    \"user_id\": 2966,\n    \"time_of_meal\": \"2014-05-20T02:53:09.652Z\",\n    \"meal_name\": \"string\"\n  },\n  {\n    \"meal_id\": 264,\n    \"user_id\": 253,\n    \"time_of_meal\": \"2019-07-30T07:16:12.801Z\",\n    \"meal_name\": \"string\"\n  }\n]"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "{meal_id}",
+					"item": [
+						{
+							"name": "Delete meal",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/meals/:meal_id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"meals",
+										":meal_id"
+									],
+									"variable": [
+										{
+											"key": "meal_id",
+											"value": "60"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Deleted",
+									"originalRequest": {
+										"method": "DELETE",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/meals/:meal_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"meals",
+												":meal_id"
+											],
+											"variable": [
+												{
+													"key": "meal_id",
+													"value": "6453"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"detail\": \"deleted\"\n}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "Create meal",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"user_id\": 1,\n  \"time_of_meal\": \"2010-08-22T21:01:36.754Z\",\n  \"meal_name\": \"string\"\n}",
+							"options": {
+								"raw": {
+									"headerFamily": "json",
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/meals",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"meals"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Created meal",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"user_id\": 2038,\n  \"time_of_meal\": \"2010-08-22T21:01:36.754Z\",\n  \"meal_name\": \"string\"\n}",
+									"options": {
+										"raw": {
+											"headerFamily": "json",
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/meals",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"meals"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"meal_id\": 7964,\n  \"user_id\": 1597,\n  \"time_of_meal\": \"1985-05-23T06:12:55.575Z\",\n  \"meal_name\": \"string\"\n}"
+						}
+					]
+				},
+				{
+					"name": "List all meals for a user",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/meals?user_id=1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"meals"
+							],
+							"query": [
+								{
+									"key": "user_id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Meals for user",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/meals?user_id=6453",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"meals"
+									],
+									"query": [
+										{
+											"key": "user_id",
+											"value": "6453"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "[\n  {\n    \"meal_id\": 661,\n    \"user_id\": 2966,\n    \"time_of_meal\": \"2014-05-20T02:53:09.652Z\",\n    \"meal_name\": \"string\"\n  },\n  {\n    \"meal_id\": 264,\n    \"user_id\": 253,\n    \"time_of_meal\": \"2019-07-30T07:16:12.801Z\",\n    \"meal_name\": \"string\"\n  }\n]"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "meal_items",
+			"item": [
+				{
+					"name": "{meal_item_id}",
+					"item": [
+						{
+							"name": "Delete meal item",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/meal_items/:meal_item_id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"meal_items",
+										":meal_item_id"
+									],
+									"variable": [
+										{
+											"key": "meal_item_id",
+											"value": "6453"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Deleted",
+									"originalRequest": {
+										"method": "DELETE",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/meal_items/:meal_item_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"meal_items",
+												":meal_item_id"
+											],
+											"variable": [
+												{
+													"key": "meal_item_id",
+													"value": "6453"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"detail\": \"deleted\"\n}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "Create meal item",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"meal_id\": 8147,\n  \"food_id\": 7,\n  \"quantity\": 532.1828947433294\n}",
+							"options": {
+								"raw": {
+									"headerFamily": "json",
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/meal_items",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"meal_items"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Created meal item",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"meal_id\": 8147,\n  \"food_id\": 1226,\n  \"quantity\": 532.1828947433294\n}",
+									"options": {
+										"raw": {
+											"headerFamily": "json",
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/meal_items",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"meal_items"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"meal_item_id\": 5519,\n  \"meal_id\": 7975,\n  \"food_id\": 1204,\n  \"quantity\": 3259.0944986189375\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "exercises",
+			"item": [
+				{
+					"name": "{exercise_id}",
+					"item": [
+						{
+							"name": "Delete exercise",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/exercises/:exercise_id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"exercises",
+										":exercise_id"
+									],
+									"variable": [
+										{
+											"key": "exercise_id",
+											"value": "6453"
+										}
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Deleted",
+									"originalRequest": {
+										"method": "DELETE",
+										"header": [
+											{
+												"key": "Accept",
+												"value": "application/json"
+											}
+										],
+										"url": {
+											"raw": "{{baseUrl}}/exercises/:exercise_id",
+											"host": [
+												"{{baseUrl}}"
+											],
+											"path": [
+												"exercises",
+												":exercise_id"
+											],
+											"variable": [
+												{
+													"key": "exercise_id",
+													"value": "6453"
+												}
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+									],
+									"cookie": [],
+									"body": "{\n  \"detail\": \"deleted\"\n}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "Create exercise",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"exercise_name\": \"new_exercise\",\n  \"primary_muscle\": \"new_exercise\",\n  \"secondary_muscle\": \"new_exercise\"\n}",
+							"options": {
+								"raw": {
+									"headerFamily": "json",
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/exercises",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"exercises"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Created exercise",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"exercise_name\": \"string\",\n  \"primary_muscle\": \"string\",\n  \"secondary_muscle\": \"string\"\n}",
+									"options": {
+										"raw": {
+											"headerFamily": "json",
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/exercises",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"exercises"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"exercise_id\": 6391,\n  \"exercise_name\": \"string\",\n  \"primary_muscle\": \"string\",\n  \"secondary_muscle\": \"string\"\n}"
+						}
+					]
+				},
+				{
+					"name": "List all exercises",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/exercises/all",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"exercises",
+								"all"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "All exercises",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/exercises",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"exercises"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "[\n  {\n    \"exercise_id\": 5987,\n    \"exercise_name\": \"string\",\n    \"primary_muscle\": \"string\",\n    \"secondary_muscle\": \"string\"\n  },\n  {\n    \"exercise_id\": 2144,\n    \"exercise_name\": \"string\",\n    \"primary_muscle\": \"string\",\n    \"secondary_muscle\": \"string\"\n  }\n]"
+						}
+					]
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8000"
+		}
+	]
+}
